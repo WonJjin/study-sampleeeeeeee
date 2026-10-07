@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#FFF0F6">
+<title>공주님의 보석 왕관 만들기</title>
+
+<!-- 예쁜 한국어 글꼴(Noto Sans KR)을 불러오는 부분이에요 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================
+   🎨 1. 색깔 상자 (여기 색을 바꾸면 앱 전체 분위기가 바뀌어요)
+   ===================================================== */
+:root {
+  /* 소연쌤 파스텔 색깔들 */
+  --mint: #A8E6CF;       --mint-light: #D4F5E9;     --mint-dark: #5DBF9A;
+  --peach: #FFD3B6;      --peach-light: #FFF0E8;    --peach-dark: #E8856A;
+  --lavender: #D4C5F9;   --lavender-light: #EDE8FF; --lavender-dark: #8B7BD8;
+  --sky: #B8E0FF;        --sky-light: #E8F5FF;      --sky-dark: #5BA8E5;
+  --cream: #FFF9E6;      --yellow: #FFE066;
+  --pink: #FFC9DE;       --pink-light: #FFF0F6;     --pink-dark: #E0709C;
+
+  --text-dark: #3D2C2C;  --text-mid: #7A6A6A;
+  --white: #FFFFFF;
+
+  --shadow: 0 4px 16px rgba(61, 44, 44, 0.08);
+  --shadow-sm: 0 2px 8px rgba(61, 44, 44, 0.06);
+  --border: 1.5px solid rgba(61, 44, 44, 0.08);
+
+  /* 보석 상자 칸 크기 (태블릿 높이에 맞춰 자동으로 조절, 최소 80px) */
+  --cell: clamp(80px, 11dvh, 100px);
+  /* 왕관 틀의 가로 크기 */
+  --stage-w: min(calc(100vw - 56px), 760px);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text-dark);
+  background-color: var(--pink-light);
+  /* 아주 연한 물방울 무늬 */
+  background-image: radial-gradient(rgba(255, 201, 222, 0.55) 3px, transparent 3.5px);
+  background-size: 34px 34px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  /* 손가락으로 꾹 눌러도 글자 선택/메뉴가 뜨지 않게 해요 */
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* =====================================================
+   📺 2. 화면(시작 / 꾸미기 / 완성) 공통
+   ===================================================== */
+.screen {
+  display: none;
+  min-height: 100vh; min-height: 100dvh;
+  padding: 20px;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.4s ease;
+}
+.screen.active { display: flex; }
+
+/* 카드 (소연쌤 스타일: 둥근 모서리 + 부드러운 그림자) */
+.card {
+  background: var(--white);
+  border: var(--border);
+  border-radius: 28px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.card-peach { background: var(--peach-light); border-color: var(--peach); }
+
+.pill-header {
+  background: var(--white);
+  border: var(--border);
+  border-radius: 100px;
+  padding: 10px 28px;
+  display: inline-block;
+  font-weight: 700;
+  font-size: clamp(22px, 5vw, 32px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* =====================================================
+   🔘 3. 버튼 (아이 손가락에 닿기 쉽게 아주 크게!)
+   ===================================================== */
+button { font-family: inherit; touch-action: manipulation; cursor: pointer; }
+
+.btn-big {
+  border: none;
+  border-radius: 60px;
+  min-height: 88px;
+  padding: 14px 44px;
+  font-size: clamp(30px, 6vw, 40px);
+  font-weight: 700;
+  color: var(--text-dark);
+  background: var(--pink);
+  box-shadow: 0 7px 0 #E8A5C2, var(--shadow);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.btn-big .emoji { font-size: 1.15em; }
+.btn-big:active { transform: translateY(5px); box-shadow: 0 2px 0 #E8A5C2, var(--shadow-sm); }
+
+.btn-yellow { background: var(--yellow); box-shadow: 0 7px 0 #E8C34A, var(--shadow); }
+.btn-yellow:active { box-shadow: 0 2px 0 #E8C34A, var(--shadow-sm); }
+
+.icon-btn {
+  border: none;
+  width: 80px; height: 80px; min-height: 80px;
+  border-radius: 50%;
+  font-size: 38px; line-height: 1;
+  background: var(--lavender-light);
+  box-shadow: 0 6px 0 var(--lavender), var(--shadow-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.icon-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--lavender); }
+.sound-btn.off { opacity: 0.55; }
+
+/* =====================================================
+   🏠 4. 시작 화면
+   ===================================================== */
+.start-card {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  width: 100%; max-width: 560px;
+  padding: 28px; border-radius: 36px;
+}
+.start-art {
+  position: relative;
+  width: max(150px, min(70vw, 280px, calc((100dvh - 340px) * 0.577)));
+  aspect-ratio: 300 / 520;
+}
+.float-gem {
+  position: absolute; line-height: 0;
+  animation: floaty 3s ease-in-out infinite alternate;
+}
+.float-gem svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 3px 3px rgba(61,44,44,.2)); }
+
+/* =====================================================
+   💎 5. 꾸미기 화면
+   ===================================================== */
+#screen-make { gap: 16px; flex-wrap: wrap; align-content: center; }
+
+.stage-card { padding: 14px; border-radius: 32px; }
+
+/* 왕관 틀이 놓이는 판 (보석이 이 안에 붙어요) */
+.crown-stage {
+  position: relative;
+  width: var(--stage-w);
+  aspect-ratio: 3 / 2;
+}
+.crown-svg { display: block; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+
+/* 오른쪽(또는 아래쪽) 보석 상자 + 버튼 묶음 */
+.side-panel {
+  display: flex; flex-direction: column; gap: 14px;
+  width: calc(var(--stage-w) + 28px);
+}
+.tray {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--cell));
+  gap: 10px;
+  justify-content: center;
+}
+.tray-cell {
+  width: var(--cell); height: var(--cell);
+  border-radius: 26px;
+  background: var(--white);
+  border: 2px solid rgba(61, 44, 44, 0.06);
+  box-shadow: 0 5px 0 rgba(224, 112, 156, 0.25);
+  display: flex; align-items: center; justify-content: center;
+  touch-action: none;          /* 끌어다 놓을 때 화면이 스크롤되지 않게 */
+  cursor: grab;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.tray-cell.picked { transform: scale(0.92); opacity: 0.6; }
+.tray-gem { line-height: 0; pointer-events: none; }
+.tray-gem.big { width: 80%; }
+.tray-gem.small { width: 54%; }
+
+.actions {
+  display: grid;
+  grid-template-columns: 80px 80px 1fr;
+  gap: 12px; align-items: center;
+}
+.actions .icon-btn { width: 100%; border-radius: 40px; }
+.btn-finish { min-height: 88px; width: 100%; font-size: 44px; padding: 10px 20px; }
+
+/* ---- 보석 그림 공통 ---- */
+.gem { line-height: 0; aspect-ratio: 1; }
+.gem svg {
+  width: 100%; height: 100%; display: block;
+  filter: drop-shadow(0 3px 3px rgba(61, 44, 44, 0.22));
+  pointer-events: none;
+}
+/* 왕관 위에 붙은 보석 */
+.placed {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+  cursor: grab;
+}
+.placed::before { content: ''; position: absolute; inset: -8px; } /* 손가락이 살짝 빗나가도 잡히게 */
+.placed.dragging { cursor: grabbing; }
+.placed.dragging svg { transform: scale(1.18); filter: drop-shadow(0 9px 8px rgba(61, 44, 44, 0.3)); }
+.placed.will-go svg { opacity: 0.5; }
+.placed.pop svg { animation: gemPop 0.5s cubic-bezier(.3, 1.7, .5, 1); }
+.vanish { pointer-events: none; }
+.vanish svg { animation: gemVanish 0.3s ease forwards; }
+/* 손가락을 따라다니는 보석 */
+.ghost {
+  position: fixed; z-index: 900; pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.ghost svg { transform: scale(1.15); filter: drop-shadow(0 9px 8px rgba(61, 44, 44, 0.3)); }
+
+/* 반짝이 효과가 그려지는 투명한 판 */
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+.spark { position: absolute; line-height: 0; }
+.spark svg { width: 100%; height: 100%; }
+
+/* =====================================================
+   👸 6. 완성 화면
+   ===================================================== */
+.finish-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.princess-stage {
+  position: relative;
+  width: max(200px, min(86vw, 440px, calc((100dvh - 170px) * 0.577)));
+  aspect-ratio: 300 / 520;
+}
+.p-body { position: absolute; inset: 0; transform-origin: 50% 100%; }
+.princess-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* 공주님 머리 위에 내려앉는 왕관 */
+.crown-holder {
+  position: absolute; left: 25%; width: 50%; top: 15.7%;
+  aspect-ratio: 3 / 2;
+  transform-origin: 50% 100%;
+  animation: crownDrop 1.25s forwards;
+  z-index: 3;
+}
+.crown-holder .crown-stage { width: 100%; }
+.crown-holder * { pointer-events: none; }
+.crown-holder.hint { top: -2%; animation: bob 1.8s ease-in-out infinite alternate; }
+
+/* 공주님 말풍선 */
+.bubble {
+  position: absolute; left: 60%; top: 3%;
+  white-space: nowrap;
+  background: var(--white);
+  border: 3px solid var(--pink);
+  border-radius: 30px;
+  padding: 10px 22px;
+  font-size: clamp(26px, 6vw, 40px); font-weight: 700;
+  color: var(--pink-dark);
+  box-shadow: var(--shadow);
+  transform: scale(0); transform-origin: 10% 100%;
+  z-index: 5;
+}
+.bubble::after {
+  content: ''; position: absolute; left: 20px; bottom: -13px;
+  width: 22px; height: 22px; background: var(--white);
+  border-right: 3px solid var(--pink); border-bottom: 3px solid var(--pink);
+  transform: rotate(45deg);
+}
+.bubble.show { animation: bubblePop 0.5s ease forwards; }
+
+/* 공주님 동작 */
+.princess-stage.hop .p-body { animation: hop 0.7s ease; }
+.princess-stage.happy .p-body { animation: sway 2.4s ease-in-out infinite alternate; }
+.eyes { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
+.arm-wave { transform-box: view-box; transform-origin: 188px 296px; }
+.waving .arm-wave { animation: armRaise 0.5s ease-out forwards, armWave 0.5s ease-in-out 0.5s infinite alternate; }
+
+/* =====================================================
+   ✨ 7. 움직임(애니메이션) 모음
+   ===================================================== */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes floaty { from { transform: translateY(-8px) rotate(-6deg); } to { transform: translateY(8px) rotate(6deg); } }
+@keyframes bob { from { transform: translateY(-6px) rotate(-3deg); } to { transform: translateY(6px) rotate(3deg); } }
+@keyframes gemPop { 0% { transform: scale(0.2) rotate(-30deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes gemVanish { to { transform: scale(0) rotate(120deg); opacity: 0; } }
+@keyframes crownDrop {
+  0%   { transform: translateY(-380%) rotate(-14deg); opacity: 0; animation-timing-function: cubic-bezier(.55, 0, .9, .6); }
+  12%  { opacity: 1; }
+  62%  { transform: translateY(4%) rotate(3deg); animation-timing-function: ease-out; }
+  80%  { transform: translateY(-4%) rotate(-3deg); animation-timing-function: ease-in-out; }
+  100% { transform: translateY(0) rotate(-2deg); opacity: 1; }
+}
+@keyframes bubblePop { 0% { transform: scale(0); } 70% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes hop { 0% { transform: translateY(0); } 30% { transform: translateY(-5%) scaleY(1.03); } 60% { transform: translateY(0) scaleY(0.97); } 100% { transform: translateY(0); } }
+@keyframes sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes armRaise { to { transform: rotate(-120deg); } }
+@keyframes armWave { from { transform: rotate(-120deg); } to { transform: rotate(-150deg); } }
+
+/* =====================================================
+   📱 8. 화면 크기별 모양 (소연쌤 반응형 규칙)
+   ===================================================== */
+/* 가로로 넓은 태블릿: 왼쪽 왕관 틀, 오른쪽 보석 상자 */
+@media (orientation: landscape) and (min-width: 820px) {
+  :root {
+    --cell: clamp(80px, 11dvh, 96px);
+    --stage-w: min(calc(100vw - 390px), calc((100dvh - 110px) * 1.5), 840px);
+  }
+  #screen-make { flex-wrap: nowrap; }
+  .side-panel { width: calc(var(--cell) * 3 + 20px + 28px); }
+  .actions { grid-template-columns: 1fr 1fr; }
+  .btn-finish { grid-column: 1 / -1; }
+}
+@media (max-width: 768px) {
+  .screen { padding: 16px; }
+}
+@media (max-width: 480px) {
+  .screen { padding: 12px; }
+  .card { border-radius: 22px; }
+  .btn-big { width: 100%; padding: 14px 20px; }
+  .start-card { padding: 20px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 반짝이가 나타나는 투명한 판 -->
+<div id="fx"></div>
+
+<!-- ===================== 화면 1: 시작 ===================== -->
+<section id="screen-start" class="screen active">
+  <div class="card start-card">
+    <div class="pill-header">👑 공주님의 보석 왕관</div>
+    <div class="start-art" id="startArt"></div>
+    <button class="btn-big" id="btnStart" aria-label="시작">
+      <span class="emoji">👑</span><span>시작</span>
+    </button>
+    <button class="icon-btn sound-btn" aria-label="소리 켜기 끄기">🔊</button>
+  </div>
+</section>
+
+<!-- ===================== 화면 2: 꾸미기 ===================== -->
+<section id="screen-make" class="screen">
+  <!-- 왕관 틀 -->
+  <div class="card stage-card">
+    <div class="crown-stage" id="stage"></div>
+  </div>
+
+  <!-- 보석 상자 + 버튼들 -->
+  <div class="side-panel">
+    <div class="card card-peach tray" id="tray"></div>
+    <div class="actions">
+      <button class="icon-btn" id="btnReset" aria-label="처음부터">🔄</button>
+      <button class="icon-btn sound-btn" aria-label="소리 켜기 끄기">🔊</button>
+      <button class="btn-big btn-yellow btn-finish" id="btnFinish" aria-label="완성">✨</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 화면 3: 완성 ===================== -->
+<section id="screen-finish" class="screen">
+  <div class="finish-wrap">
+    <div class="princess-stage" id="princessStage"></div>
+    <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center; width:100%;">
+      <button class="btn-big" id="btnAgain" aria-label="또 만들기">
+        <span class="emoji">🎀</span><span>또 만들기</span>
+      </button>
+      <button class="icon-btn sound-btn" aria-label="소리 켜기 끄기">🔊</button>
+    </div>
+  </div>
+</section>
+
+
+<script>
+/* =====================================================
+   ⚙️ 1. 바꿔보기 상자 — 여기만 고쳐도 앱이 달라져요!
+   ===================================================== */
+const CONFIG = {
+  // 👸 공주님이 말풍선에 보여주는 말 (여기를 바꾸면 돼요!)
+  princessSaying: '고마워요!',
+  // 🔊 공주님이 소리로 말하는 말 (태블릿에 한국어 음성이 있을 때만 들려요)
+  speakText: '고마워요!',
+  speakEnabled: true,   // 소리로 말하게 하고 싶지 않으면 false 로 바꿔요
+};
+
+// 🎨 보석 색깔 (main=진한 색, light=연한 색, dark=테두리 색)  ← 여기를 바꾸면 돼요!
+const COLORS = {
+  pink:   { name: '분홍', main: '#FF9EC4', light: '#FFD3E4', dark: '#E0709C' },
+  purple: { name: '보라', main: '#B79CF5', light: '#E3D6FF', dark: '#8B7BD8' },
+  sky:    { name: '하늘', main: '#7FC8FF', light: '#CBEAFF', dark: '#4A9FE0' },
+  yellow: { name: '노랑', main: '#FFD84D', light: '#FFF1A8', dark: '#E0A92E' },
+  green:  { name: '초록', main: '#7ADBB0', light: '#C9F5E1', dark: '#4DB38A' },
+};
+const SHAPE_NAMES = { circle: '동그라미', heart: '하트', star: '별', diamond: '다이아', flower: '꽃' };
+
+// 💎 보석 상자에 들어갈 보석 목록 (줄을 지우거나 더하면 개수가 바뀌어요!)
+//   shape: 모양 / color: 색깔 / size: 'big'(큰 보석) 또는 'small'(작은 보석)
+//   note: 놓을 때 나는 소리의 높이 (숫자가 클수록 높은 소리)
+const GEMS = [
+  { shape: 'heart',   color: 'pink',   size: 'big',   note: 523.25 },
+  { shape: 'diamond', color: 'purple', size: 'big',   note: 587.33 },
+  { shape: 'star',    color: 'yellow', size: 'big',   note: 659.25 },
+  { shape: 'circle',  color: 'sky',    size: 'big',   note: 783.99 },
+  { shape: 'flower',  color: 'green',  size: 'big',   note: 880.00 },
+  { shape: 'circle',  color: 'pink',   size: 'small', note: 1046.5 },
+  { shape: 'heart',   color: 'purple', size: 'small', note: 1174.7 },
+  { shape: 'star',    color: 'sky',    size: 'small', note: 1318.5 },
+  { shape: 'flower',  color: 'yellow', size: 'small', note: 1568.0 },
+  { shape: 'diamond', color: 'green',  size: 'small', note: 1760.0 },
+];
+
+// 왕관 위에서 보석이 차지하는 크기 (왕관 가로 길이의 몇 %인지)
+const SIZE_RATIO = { big: 0.15, small: 0.105 };
+
+/* =====================================================
+   🧰 2. 작은 도구들
+   ===================================================== */
+const $ = (selector, root = document) => root.querySelector(selector);
+const stage = $('#stage');
+const tray = $('#tray');
+const fx = $('#fx');
+let zTop = 10;   // 방금 만진 보석이 맨 위로 오게 하는 번호
+
+/* =====================================================
+   💎 3. 보석 그림 그리기 (SVG)
+   모양(shape)과 색깔(color)을 알려주면 보석 그림을 만들어 줘요
+   ===================================================== */
+function gemSVG(shape, colorName) {
+  const c = COLORS[colorName];
+  // 반짝 하이라이트(하얀 타원)
+  const hl = (cx, cy, rx, ry, rot = -30) =>
+    `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".85" transform="rotate(${rot} ${cx} ${cy})"/>`;
+  let body = '';
+
+  if (shape === 'circle') {
+    body = `<circle cx="50" cy="50" r="40" fill="${c.main}" stroke="${c.dark}" stroke-width="5"/>
+            <circle cx="50" cy="50" r="23" fill="${c.light}" opacity=".6"/>` + hl(36, 34, 10, 6);
+  }
+  else if (shape === 'heart') {
+    body = `<path d="M50 88 C12 60 6 36 18 22 C29 10 46 14 50 30 C54 14 71 10 82 22 C94 36 88 60 50 88 Z"
+              fill="${c.main}" stroke="${c.dark}" stroke-width="5" stroke-linejoin="round"/>
+            <path d="M50 70 C28 52 26 40 32 33 C38 27 47 30 50 40 C53 30 62 27 68 33 C74 40 72 52 50 70 Z" fill="${c.light}" opacity=".55"/>`
+         + hl(31, 31, 9, 5);
+  }
+  else if (shape === 'star') {
+    body = `<polygon points="50,8 61.8,35.8 91.9,38.4 69,58.2 75.9,87.6 50,72 24.1,87.6 31,58.2 8.1,38.4 38.2,35.8"
+              fill="${c.main}" stroke="${c.dark}" stroke-width="6" stroke-linejoin="round"/>
+            <polygon points="50,28 56,44 73,45 60,56 64,72 50,63 36,72 40,56 27,45 44,44" fill="${c.light}" opacity=".55"/>`
+         + hl(44, 30, 7, 4);
+  }
+  else if (shape === 'diamond') {
+    body = `<polygon points="50,8 88,38 50,94 12,38" fill="${c.main}" stroke="${c.dark}" stroke-width="5" stroke-linejoin="round"/>
+            <polygon points="50,8 88,38 12,38" fill="${c.light}" opacity=".75"/>
+            <path d="M30 38 L50 94 M70 38 L50 94 M50 8 L30 38 M50 8 L70 38" stroke="${c.dark}" stroke-width="3" opacity=".45" fill="none" stroke-linejoin="round"/>`
+         + hl(34, 25, 8, 4);
+  }
+  else if (shape === 'flower') {
+    const petals = [[50,26],[72.8,42.6],[64.1,69.4],[35.9,69.4],[27.2,42.6]];
+    // 꽃잎을 두 번 그려요: 첫 번째는 테두리용, 두 번째는 안쪽을 매끈하게 채우기용
+    body = petals.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="20" fill="${c.main}" stroke="${c.dark}" stroke-width="5"/>`).join('')
+         + petals.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="18" fill="${c.main}"/>`).join('')
+         + `<circle cx="50" cy="50" r="13" fill="#FFF6C2" stroke="${c.dark}" stroke-width="4"/>` + hl(44, 21, 7, 4);
+  }
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+}
+
+// 보석 하나(그림 + 크기)를 화면에 놓을 수 있는 조각으로 만들어요
+function makeGemEl(def) {
+  const el = document.createElement('div');
+  el.className = 'gem';
+  el.innerHTML = gemSVG(def.shape, def.color);
+  return el;
+}
+
+/* =====================================================
+   👑 4. 왕관 틀 그림 (SVG)
+   ===================================================== */
+function crownSVG() {
+  return `
+  <svg class="crown-svg" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- 왕관 몸통 (이 모양 안에만 보석이 붙어요) -->
+    <path class="crown-body" d="M40 370 L40 130 L120 240 L180 80 L240 240 L300 40 L360 240 L420 80 L480 240 L560 130 L560 370 Z"
+          fill="#FFF0B8" stroke="#E8B94A" stroke-width="12" stroke-linejoin="round"/>
+    <!-- 아래 띠 -->
+    <rect x="46" y="292" width="508" height="72" fill="#FFE17A"/>
+    <path d="M46 292 L554 292" stroke="#E8B94A" stroke-width="6"/>
+    <!-- 뾰족 끝 동그란 장식 -->
+    <g fill="#FFB6D1" stroke="#E8B94A" stroke-width="6">
+      <circle cx="40" cy="130" r="17"/><circle cx="180" cy="80" r="17"/><circle cx="300" cy="40" r="19"/>
+      <circle cx="420" cy="80" r="17"/><circle cx="560" cy="130" r="17"/>
+    </g>
+  </svg>`;
+}
+stage.innerHTML = crownSVG();   // 꾸미기 화면에 왕관 틀 넣기
+
+/* 왕관 몸통 안에 손가락이 있는지 알아보는 함수 (x, y는 화면 위치) */
+function isOnCrown(x, y) {
+  const svg = $('.crown-svg', stage);
+  const body = $('.crown-body', stage);
+  const m = svg.getScreenCTM();
+  if (!m) return false;
+  const inv = m.inverse();
+  const pt = svg.createSVGPoint();
+  const tol = 14;  // 가장자리에 살짝 걸쳐도 붙도록 넉넉하게!
+  return [[0, 0], [tol, 0], [-tol, 0], [0, tol], [0, -tol]].some(([dx, dy]) => {
+    pt.x = x; pt.y = y;
+    const p = pt.matrixTransform(inv);
+    p.x += dx; p.y += dy;
+    return body.isPointInFill(p);
+  });
+}
+
+/* =====================================================
+   👸 5. 공주님 그림 (SVG)
+   ===================================================== */
+function princessSVG() {
+  return `
+  <svg class="princess-svg" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+    <!-- 뒤쪽 머리카락 -->
+    <path d="M60 230 Q56 130 150 126 Q244 130 240 230 L256 380 Q150 404 44 380 Z" fill="#F7C873" stroke="#E5A94E" stroke-width="4" stroke-linejoin="round"/>
+    <!-- 목 -->
+    <rect x="136" y="262" width="28" height="40" fill="#FFE5D0" stroke="#E5A98C" stroke-width="3"/>
+    <!-- 치마 -->
+    <path d="M108 318 L192 318 L262 498 Q150 524 38 498 Z" fill="#FFB8D5" stroke="#E57FAA" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M150 334 L150 508 M122 334 L96 506 M178 334 L204 506" stroke="#FFD3E4" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+    <path d="M44 482 Q70 502 96 488 Q123 508 150 492 Q177 508 204 488 Q230 502 256 482" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".85"/>
+    <!-- 윗옷 -->
+    <path d="M112 290 Q150 280 188 290 L192 324 L108 324 Z" fill="#FFD3E4" stroke="#E57FAA" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="104" y="316" width="92" height="16" rx="8" fill="#D4C5F9" stroke="#8B7BD8" stroke-width="3"/>
+    <circle cx="150" cy="302" r="7" fill="#FF9EC4" stroke="#E0709C" stroke-width="3"/>
+    <!-- 왼쪽 팔 -->
+    <path d="M112 298 Q82 332 84 372" stroke="#E5A98C" stroke-width="21" fill="none" stroke-linecap="round"/>
+    <path d="M112 298 Q82 332 84 372" stroke="#FFE5D0" stroke-width="15" fill="none" stroke-linecap="round"/>
+    <circle cx="84" cy="378" r="11" fill="#FFE5D0" stroke="#E5A98C" stroke-width="3"/>
+    <!-- 오른쪽 팔 (완성되면 손을 흔들어요) -->
+    <g class="arm-wave">
+      <path d="M188 298 Q218 332 216 372" stroke="#E5A98C" stroke-width="21" fill="none" stroke-linecap="round"/>
+      <path d="M188 298 Q218 332 216 372" stroke="#FFE5D0" stroke-width="15" fill="none" stroke-linecap="round"/>
+      <circle cx="216" cy="378" r="11" fill="#FFE5D0" stroke="#E5A98C" stroke-width="3"/>
+    </g>
+    <!-- 소매 -->
+    <circle cx="110" cy="298" r="17" fill="#FFD3E4" stroke="#E57FAA" stroke-width="3"/>
+    <circle cx="190" cy="298" r="17" fill="#FFD3E4" stroke="#E57FAA" stroke-width="3"/>
+    <!-- 얼굴 -->
+    <circle cx="150" cy="212" r="62" fill="#FFE5D0" stroke="#E5A98C" stroke-width="4"/>
+    <!-- 앞머리 -->
+    <path d="M88 208 Q92 148 150 146 Q208 148 212 208 Q190 170 150 176 Q110 170 88 208 Z" fill="#F7C873" stroke="#E5A94E" stroke-width="4" stroke-linejoin="round"/>
+    <!-- 눈 (깜빡깜빡) -->
+    <g class="eyes">
+      <ellipse cx="126" cy="224" rx="7" ry="9" fill="#3D2C2C"/><circle cx="129" cy="220" r="2.8" fill="#fff"/>
+      <ellipse cx="174" cy="224" rx="7" ry="9" fill="#3D2C2C"/><circle cx="177" cy="220" r="2.8" fill="#fff"/>
+    </g>
+    <!-- 볼터치, 웃는 입 -->
+    <ellipse cx="110" cy="246" rx="11" ry="7" fill="#FF9EC4" opacity=".55"/>
+    <ellipse cx="190" cy="246" rx="11" ry="7" fill="#FF9EC4" opacity=".55"/>
+    <path d="M138 244 Q150 258 162 244" stroke="#D2677F" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* =====================================================
+   🔊 6. 소리 만들기 (Web Audio — 소리 파일 없이 직접 만들어요!)
+   ===================================================== */
+let audioCtx = null, master = null, soundOn = true;
+
+// 태블릿은 "손가락으로 한 번 눌러야" 소리를 낼 수 있어서, 누를 때마다 준비해 줘요
+function unlockAudio() {
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audioCtx = new AC();
+      master = audioCtx.createGain();
+      master.gain.value = 0.9;
+      const comp = audioCtx.createDynamicsCompressor();   // 소리가 갑자기 커지지 않게 눌러주는 장치
+      master.connect(comp); comp.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) { /* 소리가 안 나도 놀이는 계속돼요 */ }
+}
+
+// 🔔 맑은 종소리 하나 (freq=소리 높이, delay=몇 초 뒤에, vol=크기, dur=길이)
+function bell(freq, delay = 0, vol = 0.22, dur = 1.4) {
+  if (!audioCtx || !soundOn) return;
+  const t = audioCtx.currentTime + delay;
+  // 종소리는 여러 높이의 소리가 겹쳐서 만들어져요
+  [[1, 1], [2.76, 0.35], [5.4, 0.12]].forEach(([mult, amp]) => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq * mult;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol * amp, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur / (1 + (mult - 1) * 0.4));
+    osc.connect(g); g.connect(master);
+    osc.start(t); osc.stop(t + dur + 0.1);
+  });
+}
+
+// 🌬️ 소리 높이가 쭉 변하는 소리 (슝~, 퐁!)
+function sweep(f0, f1, dur, vol) {
+  if (!audioCtx || !soundOn) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(f0, t);
+  osc.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(g); g.connect(master);
+  osc.start(t); osc.stop(t + dur + 0.05);
+}
+
+// 여러 가지 효과음 모음
+const sfx = {
+  pick(note)  { bell(note, 0, 0.07, 0.4); },                                   // 보석을 집을 때
+  place(note) { bell(note, 0, 0.25, 1.4); bell(note * 2, 0.07, 0.1, 0.7); },  // 보석을 놓을 때 "반짝!"
+  pop()       { sweep(700, 250, 0.18, 0.12); },                                // 보석이 사라질 때 "퐁"
+  reset()     { [1046.5, 784, 659.25, 523.25].forEach((f, i) => bell(f, i * 0.09, 0.12, 0.8)); },
+  start()     { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => bell(f, i * 0.1, 0.18, 1)); },
+  whoosh()    { sweep(1200, 300, 0.9, 0.08); },                                // 왕관이 내려올 때 "슝~"
+  land()      { [523.25, 659.25, 783.99, 1046.5].forEach(f => bell(f, 0, 0.14, 1.8)); },
+  fanfare()   { [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568].forEach((f, i) => bell(f, i * 0.12, 0.2, 1.6)); },
+};
+
+// 공주님이 소리로 말하기 (태블릿에 한국어 음성이 있을 때)
+function speak(text) {
+  if (!CONFIG.speakEnabled || !soundOn || !('speechSynthesis' in window)) return;
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; u.pitch = 1.6; u.rate = 0.9;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// 🔊 소리 켜기/끄기 버튼 (모든 화면의 소리 버튼이 같이 바뀌어요)
+function updateSoundButtons() {
+  document.querySelectorAll('.sound-btn').forEach(b => {
+    b.textContent = soundOn ? '🔊' : '🔇';
+    b.classList.toggle('off', !soundOn);
+  });
+}
+document.querySelectorAll('.sound-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    unlockAudio();
+    soundOn = !soundOn;
+    updateSoundButtons();
+    if (!soundOn && 'speechSynthesis' in window) speechSynthesis.cancel();
+    else sfx.pick(784);
+  });
+});
+
+/* =====================================================
+   ✨ 7. 반짝이(별가루) 효과
+   ===================================================== */
+const SPARK_COLORS = ['#FF9EC4', '#B79CF5', '#7FC8FF', '#FFD84D', '#7ADBB0', '#FFFFFF'];
+function sparkSVG(color) {
+  return `<svg viewBox="0 0 24 24"><path d="M12 0 C13 8 16 11 24 12 C16 13 13 16 12 24 C11 16 8 13 0 12 C8 11 11 8 12 0Z" fill="${color}"/></svg>`;
+}
+
+// (x, y) 자리에서 반짝이 count개가 사방으로 퍼져요
+function sparkle(x, y, count = 8, spread = 70) {
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement('div');
+    const size = 14 + Math.random() * 18;
+    s.className = 'spark';
+    s.style.cssText = `left:${x}px; top:${y}px; width:${size}px; height:${size}px;`;
+    s.innerHTML = sparkSVG(SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)]);
+    fx.appendChild(s);
+
+    const angle = Math.random() * Math.PI * 2;
+    const dist = spread * (0.4 + Math.random() * 0.8);
+    const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist;
+    const rot = (Math.random() - 0.5) * 240;
+    const anim = s.animate([
+      { transform: 'translate(-50%,-50%) scale(0.2) rotate(0deg)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx * 0.7}px), calc(-50% + ${dy * 0.7}px)) scale(1.1) rotate(${rot * 0.6}deg)`, opacity: 1, offset: 0.55 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0) rotate(${rot}deg)`, opacity: 0 },
+    ], { duration: 600 + Math.random() * 400, easing: 'ease-out' });
+    anim.onfinish = () => s.remove();
+  }
+}
+
+/* =====================================================
+   🖐️ 8. 끌어다 놓기 도우미
+   손가락/마우스가 움직이는 동안(onMove), 그리고 놓았을 때(onEnd) 할 일을 알려줘요
+   ===================================================== */
+function trackPointer(el, e, onMove, onEnd) {
+  el.setPointerCapture(e.pointerId);   // 손가락이 빨리 움직여도 놓치지 않게 꼭 붙잡아요
+  const move = ev => { if (ev.pointerId === e.pointerId) onMove(ev); };
+  const up = ev => {
+    if (ev.pointerId !== e.pointerId) return;
+    el.removeEventListener('pointermove', move);
+    el.removeEventListener('pointerup', up);
+    el.removeEventListener('pointercancel', up);
+    onEnd(ev);
+  };
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+}
+
+// 보석의 위치를 왕관 틀 기준 %로 저장해요 (화면 크기가 바뀌어도 제자리!)
+function setGemPos(el, cx, cy) {
+  const r = stage.getBoundingClientRect();
+  el.style.left = ((cx - r.left) / r.width * 100) + '%';
+  el.style.top  = ((cy - r.top) / r.height * 100) + '%';
+}
+
+/* =====================================================
+   💎 9. 보석 상자 만들기 + 보석 집기
+   ===================================================== */
+GEMS.forEach(def => {
+  const cell = document.createElement('div');
+  cell.className = 'tray-cell';
+  cell.setAttribute('role', 'button');
+  cell.setAttribute('aria-label', `${COLORS[def.color].name} ${SHAPE_NAMES[def.shape]} 보석`);
+  const g = document.createElement('div');
+  g.className = 'tray-gem ' + def.size;
+  g.innerHTML = gemSVG(def.shape, def.color);
+  cell.appendChild(g);
+  cell.addEventListener('pointerdown', e => onTrayDown(e, def, cell));
+  tray.appendChild(cell);   // 보석 상자의 보석은 끌어가도 줄지 않아요 (무한!)
+});
+
+const LIFT = 28;   // 보석이 손가락에 가려지지 않게 살짝 위에 떠 있어요
+
+function onTrayDown(e, def, cell) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  e.preventDefault();
+  unlockAudio();
+  sfx.pick(def.note);
+
+  // 손가락을 따라다니는 보석(고스트) 만들기
+  const ghost = makeGemEl(def);
+  ghost.classList.add('ghost');
+  ghost.style.width = (stage.getBoundingClientRect().width * SIZE_RATIO[def.size]) + 'px';
+  document.body.appendChild(ghost);
+  const moveGhost = (x, y) => { ghost.style.left = x + 'px'; ghost.style.top = (y - LIFT) + 'px'; };
+  moveGhost(e.clientX, e.clientY);
+  cell.classList.add('picked');
+
+  trackPointer(cell, e,
+    ev => moveGhost(ev.clientX, ev.clientY),
+    ev => {
+      cell.classList.remove('picked');
+      const x = ev.clientX, y = ev.clientY - LIFT;
+      if (ev.type !== 'pointercancel' && isOnCrown(x, y)) {
+        addGemToCrown(def, x, y);          // 왕관 위에 놓으면 붙어요!
+        ghost.remove();
+      } else {
+        // 왕관 밖에 놓으면 보석이 상자로 살며시 돌아가요
+        const c = cell.getBoundingClientRect();
+        ghost.style.transition = 'all 0.3s ease';
+        ghost.style.left = (c.left + c.width / 2) + 'px';
+        ghost.style.top = (c.top + c.height / 2) + 'px';
+        ghost.style.opacity = '0';
+        ghost.style.transform = 'translate(-50%,-50%) scale(0.4)';
+        setTimeout(() => ghost.remove(), 320);
+      }
+    });
+}
+
+/* =====================================================
+   👑 10. 왕관에 보석 붙이기 / 옮기기 / 떼기
+   ===================================================== */
+function addGemToCrown(def, cx, cy) {
+  const el = makeGemEl(def);
+  el.classList.add('placed', 'pop');
+  el.style.width = (SIZE_RATIO[def.size] * 100) + '%';
+  el.style.zIndex = ++zTop;
+  setGemPos(el, cx, cy);
+  stage.appendChild(el);
+  el.addEventListener('pointerdown', e => onPlacedDown(e, el, def));
+  sparkle(cx, cy, 9, 70);   // ✨ 반짝!
+  sfx.place(def.note);      // 🔔 맑은 소리!
+}
+
+function onPlacedDown(e, el, def) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  e.preventDefault();
+  unlockAudio();
+  // 잡은 자리와 보석 가운데의 차이를 기억해서, 잡아도 보석이 톡 튀지 않게 해요
+  const r0 = el.getBoundingClientRect();
+  const offX = r0.left + r0.width / 2 - e.clientX;
+  const offY = r0.top + r0.height / 2 - e.clientY;
+  el.style.zIndex = ++zTop;
+  el.classList.remove('pop');
+  el.classList.add('dragging');
+  sfx.pick(def.note);
+
+  trackPointer(el, e,
+    ev => {
+      const x = ev.clientX + offX, y = ev.clientY + offY;
+      setGemPos(el, x, y);
+      el.classList.toggle('will-go', !isOnCrown(x, y));   // 왕관 밖이면 흐려져요
+    },
+    ev => {
+      el.classList.remove('dragging', 'will-go');
+      const x = ev.clientX + offX, y = ev.clientY + offY;
+      if (ev.type !== 'pointercancel' && isOnCrown(x, y)) {
+        sfx.place(def.note);
+        sparkle(x, y, 5, 50);
+      } else {
+        removeGem(el, x, y);   // 왕관 밖으로 끌어내면 사라져요
+      }
+    });
+}
+
+function removeGem(el, x, y) {
+  sfx.pop();
+  sparkle(x, y, 6, 55);
+  el.classList.add('vanish');
+  setTimeout(() => el.remove(), 300);
+}
+
+/* "처음부터" — 보석이 하나씩 반짝이며 부드럽게 사라져요 */
+function resetCrown() {
+  const gems = [...stage.querySelectorAll('.placed:not(.vanish)')];
+  sfx.reset();
+  gems.forEach((g, i) => setTimeout(() => {
+    const r = g.getBoundingClientRect();
+    sparkle(r.left + r.width / 2, r.top + r.height / 2, 3, 40);
+    g.classList.add('vanish');
+    setTimeout(() => g.remove(), 300);
+  }, i * 45));
+}
+
+/* =====================================================
+   🎀 11. 화면 바꾸기
+   ===================================================== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo(0, 0);
+}
+
+/* ---------- 시작 화면 꾸미기: 공주님 + 둥둥 떠다니는 보석 ---------- */
+(function buildStart() {
+  const art = $('#startArt');
+  art.innerHTML = princessSVG() + `<div class="crown-holder hint"><div class="crown-stage">${crownSVG()}</div></div>`;
+  // 둥둥 떠다니는 보석들 (위치 left/top, 크기 w, 움직임 시작 시간 delay)
+  const floats = [
+    { i: 0, left: -22, top: 22, w: 20, delay: 0 },
+    { i: 1, left: 100, top: 12, w: 20, delay: 0.5 },
+    { i: 2, left: -26, top: 56, w: 18, delay: 1 },
+    { i: 3, left: 104, top: 50, w: 20, delay: 0.3 },
+    { i: 4, left: -8,  top: 84, w: 18, delay: 0.8 },
+    { i: 7, left: 92,  top: 82, w: 15, delay: 1.2 },
+  ];
+  floats.forEach(f => {
+    const d = GEMS[f.i];
+    const el = document.createElement('div');
+    el.className = 'float-gem';
+    el.style.cssText = `left:${f.left}%; top:${f.top}%; width:${f.w}%; animation-delay:${f.delay}s;`;
+    el.innerHTML = gemSVG(d.shape, d.color);
+    art.appendChild(el);
+  });
+})();
+
+/* ---------- 완성 화면: 공주님에게 왕관 씌워주기 ---------- */
+let finishTimers = [];
+let confettiTimer = null;
+const later = (fn, ms) => finishTimers.push(setTimeout(fn, ms));
+
+function stopFinish() {
+  finishTimers.forEach(clearTimeout); finishTimers = [];
+  clearInterval(confettiTimer);
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+function showFinish() {
+  stopFinish();
+  const ps = $('#princessStage');
+  ps.className = 'princess-stage';
+
+  // 내가 만든 왕관을 통째로 복사해서 공주님 머리 위에 올려요
+  const crownCopy = stage.cloneNode(true);
+  crownCopy.removeAttribute('id');
+  crownCopy.querySelectorAll('.vanish').forEach(g => g.remove());   // 사라지는 중인 보석은 빼고
+  crownCopy.querySelectorAll('.placed').forEach(g => g.classList.remove('dragging', 'will-go', 'pop'));
+
+  ps.innerHTML = `<div class="p-body">${princessSVG()}<div class="crown-holder" id="crownHolder"></div></div>
+                  <div class="bubble" id="bubble">${CONFIG.princessSaying}</div>`;
+  $('#crownHolder').appendChild(crownCopy);
+  showScreen('screen-finish');
+
+  // 시간표: 몇 초 뒤에 무슨 일이 일어날지 정해요
+  sfx.whoosh();                                   // 0초: 왕관이 슝~ 내려와요
+  later(() => {                                   // 0.8초: 왕관이 머리에 "띵!"
+    sfx.land();
+    ps.classList.add('hop');
+    const r = ps.getBoundingClientRect();
+    sparkle(r.left + r.width * 0.5, r.top + r.height * 0.27, 14, 110);
+  }, 800);
+  later(() => {                                   // 1.5초: 공주님이 인사해요
+    $('#bubble').classList.add('show');
+    ps.classList.remove('hop');
+    ps.classList.add('happy', 'waving');
+    sfx.fanfare();
+    speak(CONFIG.speakText);
+    // 화면 여기저기 반짝이 폭죽!
+    let count = 0;
+    const burst = () => {
+      sparkle(Math.random() * innerWidth, Math.random() * innerHeight * 0.8, 10, 90);
+      if (++count > 14) clearInterval(confettiTimer);
+    };
+    burst();
+    confettiTimer = setInterval(burst, 400);
+  }, 1500);
+}
+
+/* =====================================================
+   ▶️ 12. 버튼 연결하기
+   ===================================================== */
+$('#btnStart').addEventListener('click', () => {
+  unlockAudio(); sfx.start();
+  showScreen('screen-make');
+});
+$('#btnReset').addEventListener('click', () => { unlockAudio(); resetCrown(); });
+$('#btnFinish').addEventListener('click', () => { unlockAudio(); showFinish(); });
+$('#btnAgain').addEventListener('click', () => {
+  unlockAudio(); sfx.start();
+  stopFinish();
+  stage.querySelectorAll('.placed').forEach(g => g.remove());   // 왕관을 깨끗이 비우고
+  showScreen('screen-start');                                   // 처음 화면으로!
+});
+
+// 화면을 꾹 눌렀을 때 메뉴가 뜨거나, 두 손가락으로 확대되는 것을 막아요
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+updateSoundButtons();
+</script>
+</body>
+</html>
